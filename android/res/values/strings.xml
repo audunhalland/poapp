@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Palmeoljesjekk</string>
-    <string name="button_stuff">Skann!</string>
+    <string name="scan">Skann!</string>
 </resources>

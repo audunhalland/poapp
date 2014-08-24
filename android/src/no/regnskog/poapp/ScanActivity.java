@@ -3,10 +3,12 @@ package no.regnskog.poapp;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.util.Log;
 
 import com.google.zxing.Result;
 
@@ -21,7 +23,7 @@ public class ScanActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.scan);
     }
 
     @Override
@@ -96,16 +98,11 @@ public class ScanActivity extends Activity
         return new ScannerCallback() {
             public void onSuccess(Result result)
             {
-                AlertDialog d = makeDialog("Success", result.getText());
-                d.setButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        startScanning();
-                    }
-                });
-                //alertDialog.setIcon(R.drawable.icon);
-                d.show();
-                stopScanning();
+                Intent i = new Intent();
+                i.setData(Uri.fromParts("ean13", result.getText(), null));
+
+                setResult(RESULT_OK, i);
+                finish();
             }
 
             public void onError(String msg)
