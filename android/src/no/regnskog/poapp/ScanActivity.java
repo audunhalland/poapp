@@ -8,6 +8,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.util.Log;
 
+import com.google.zxing.Result;
+
 public class ScanActivity extends Activity implements SurfaceHolder.Callback
 {
     private static final String TAG = "ScanActivity";
@@ -40,8 +42,29 @@ public class ScanActivity extends Activity implements SurfaceHolder.Callback
     protected void onPause()
     {
         super.onPause();
-        mScanner.kill();
-        mScanner = null;
+        stopScanning();
+    }
+
+    void stopScanning()
+    {
+        if (mScanner != null) {
+            mScanner.kill();
+            mScanner = null;
+        }
+    }
+
+    void showDialog(String text)
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(text);
+        alertDialog.setMessage(text);
+        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // here you can add functions
+            }
+        });
+        //alertDialog.setIcon(R.drawable.icon);
+        alertDialog.show();
     }
 
     ScannerCallback createScannerCallback()
@@ -49,18 +72,15 @@ public class ScanActivity extends Activity implements SurfaceHolder.Callback
         final ScanActivity sa = this;
 
         return new ScannerCallback() {
+            public void onSuccess(Result result)
+            {
+                showDialog("found: " + result.getText());
+                stopScanning();
+            }
+
             public void onError(String msg)
             {
-                AlertDialog alertDialog = new AlertDialog.Builder(sa).create();
-                alertDialog.setTitle(msg);
-                alertDialog.setMessage(msg);
-                alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // here you can add functions
-                    }
-                });
-                //alertDialog.setIcon(R.drawable.icon);
-                alertDialog.show();
+                showDialog(msg);
             }
         };
     }
@@ -81,5 +101,6 @@ public class ScanActivity extends Activity implements SurfaceHolder.Callback
         Log.d(TAG, "surfaceChanged");
 
         mScanner.setPreviewDisplay(holder);
+        mScanner.scan();
     }
 }

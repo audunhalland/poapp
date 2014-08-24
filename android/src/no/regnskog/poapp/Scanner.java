@@ -3,11 +3,18 @@ package no.regnskog.poapp;
 import java.util.concurrent.CountDownLatch;
 
 import android.hardware.Camera;
-import android.os.Message;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceHolder;
+
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.PlanarYUVLuminanceSource;
+import com.google.zxing.ReaderException;
+import com.google.zxing.Result;
 
 /**
  *  Scanner represents one "scan" lifecycle:
@@ -15,7 +22,7 @@ import android.view.SurfaceHolder;
  *  2. look for code
  *  3. publish code
  *
- *  Must be cleaned up on activity pause
+ *  kill() must be called in order to close camera and free all resources.
  */
 public class Scanner
 {
@@ -33,6 +40,8 @@ public class Scanner
     ScannerCallback mCallback;
     Camera mCamera;
 
+    MultiFormatReader mReader;
+
     Handler mUIHandler;
     Handler mBGHandler;
 
@@ -42,6 +51,9 @@ public class Scanner
     
     public Scanner(ScannerCallback callback) {
         mCallback = callback;
+        
+        mReader = new MultiFormatReader();
+
         mBGHandlerLatch = new CountDownLatch(1);
 
         Log.d(TAG, "Creating runnable");
@@ -76,8 +88,7 @@ public class Scanner
     {
         try {
             mBGHandlerLatch.await();
-        } catch (InterruptedException e) {
-        }
+        } catch (InterruptedException e) {}
     }
 
     public void initCamera()
@@ -95,10 +106,13 @@ public class Scanner
         Message.obtain(mBGHandler, MSG_SET_PREVIEW_DISPLAY, holder).sendToTarget();
     }
 
+    /**
+     *  Scan camera preview frame for a barcode.
+     *  This will continue until success or kill() is called.
+     */
     public void scan()
     {
-        /* TODO: fetch scanning frame */
-
+        awaitBGInit();
         Message.obtain(mBGHandler, MSG_SCAN).sendToTarget();
     }
 
@@ -125,7 +139,7 @@ public class Scanner
             {
                 switch (msg.what) {
                 case MSG_SCAN_SUCCEEDED:
-                    /* found something */
+                    Log.d(TAG, "scan succeeded!!!");
                     break;
                 case MSG_SCAN_UNRECOGNIZED:
                     /* retry */
@@ -134,6 +148,7 @@ public class Scanner
                 case MSG_CAMERA_ERROR:
                     /* generic error that should be displayed in UI */
                     mCallback.onError("Camera error");
+                    break;
                 }
             }
         };
@@ -199,8 +214,7 @@ public class Scanner
     {
         try {
             mCamera.stopPreview();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             mCamera.setPreviewDisplay(holder);
@@ -218,16 +232,60 @@ public class Scanner
     private void scanBG()
     {
         if (mCamera == null) {
-            Message.obtain(mUIHandler, MSG_SCAN_ERROR);
+            Message.obtain(mUIHandler, MSG_SCAN_ERROR).sendToTarget();
+            return;
         }
 
-        /* work work work */
-        boolean yes = false;
+        mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
+            public void onPreviewFrame(byte[] data, Camera camera)
+            {
+                /* TODO: according to doc, this method already runs on the
+                 * BG thread (the same thread open() was called in).
+                 * The messaging here might not be necessary
+                 */
+                assert Thread.currentThread() == mBGThread;
 
-        if (yes) {
-            Message.obtain(mUIHandler, MSG_SCAN_SUCCEEDED);
+                Camera.Parameters p = mCamera.getParameters();
+                Camera.Size pvs = p.getPreviewSize();
+
+                decodeBG(data, pvs.width, pvs.height);
+            }
+        });
+    }
+
+    /**
+     *  Scan for barcode, in bg thread
+     */
+    private void decodeBG(byte[] data, int width, int height)
+    {
+        int sLeft = 0;
+        int sTop = 0;
+        int sWidth = 200;
+        int sHeight = 300;
+
+        PlanarYUVLuminanceSource yuv =
+            new PlanarYUVLuminanceSource(data, width, height,
+                                         sLeft, sTop, sWidth, sHeight, false);
+
+        Result result = null;
+
+        if (yuv != null) {
+            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(yuv));
+            try {
+                result = mReader.decodeWithState(bitmap);
+            } catch (ReaderException e) {
+            } finally {
+                mReader.reset();
+            }
+        }
+
+        if (result != null) {
+            Log.d(TAG, "scanBG: success");
+            Message.obtain(mUIHandler, MSG_SCAN_SUCCEEDED, result).sendToTarget();
         } else {
-            Message.obtain(mUIHandler, MSG_SCAN_UNRECOGNIZED);
+            Log.d(TAG, "scanBG: unrecognized");
+            /* rescan! */
+            Message.obtain(mBGHandler, MSG_SCAN).sendToTarget();
         }
     }
 }
