@@ -1,6 +1,10 @@
 package no.regnskog.poapp;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
 
 import android.hardware.Camera;
 import android.os.Handler;
@@ -10,10 +14,14 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
+import com.google.zxing.DecodeHintType;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.ReaderException;
+import com.google.zxing.ResultPoint;
+import com.google.zxing.ResultPointCallback;
 import com.google.zxing.Result;
 
 /**
@@ -53,6 +61,7 @@ public class Scanner
         mCallback = callback;
         
         mReader = new MultiFormatReader();
+        initReader();
 
         mBGHandlerLatch = new CountDownLatch(1);
 
@@ -80,11 +89,30 @@ public class Scanner
         mUIHandler = createUIHandler();
     }
 
+    private void initReader()
+    {
+        Map<DecodeHintType, Object> hints = new EnumMap(DecodeHintType.class);
+        Collection<BarcodeFormat> formats = EnumSet.noneOf(BarcodeFormat.class);
+
+        formats.add(BarcodeFormat.EAN_13);
+        hints.put(DecodeHintType.POSSIBLE_FORMATS, formats);
+
+        hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK,
+                  new ResultPointCallback() {
+                      public void foundPossibleResultPoint(ResultPoint point)
+                      {
+                          Log.d(TAG, "found possible ResultPoint: " + point);
+                      }
+                  });
+
+        mReader.setHints(hints);
+    }
+
     /**
      *  Before we can communicate with the background thread, we
      *  need to wait until its handler is created.
      */
-    void awaitBGInit()
+    private void awaitBGInit()
     {
         try {
             mBGHandlerLatch.await();
@@ -140,6 +168,7 @@ public class Scanner
                 switch (msg.what) {
                 case MSG_SCAN_SUCCEEDED:
                     Log.d(TAG, "scan succeeded!!!");
+                    mCallback.onSuccess((Result)msg.obj);
                     break;
                 case MSG_SCAN_UNRECOGNIZED:
                     /* retry */
@@ -258,10 +287,10 @@ public class Scanner
      */
     private void decodeBG(byte[] data, int width, int height)
     {
-        int sLeft = 0;
-        int sTop = 0;
-        int sWidth = 200;
-        int sHeight = 300;
+        int sWidth = width / 2;
+        int sHeight = height / 2;
+        int sLeft = sWidth / 2;
+        int sTop = sHeight / 2;
 
         PlanarYUVLuminanceSource yuv =
             new PlanarYUVLuminanceSource(data, width, height,
