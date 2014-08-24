@@ -56,10 +56,10 @@ public class Scanner
     Runnable mBGRunnable;
     Thread mBGThread;
     final CountDownLatch mBGHandlerLatch;
-    
+
     public Scanner(ScannerCallback callback) {
         mCallback = callback;
-        
+
         mReader = new MultiFormatReader();
         initReader();
 
@@ -89,6 +89,9 @@ public class Scanner
         mUIHandler = createUIHandler();
     }
 
+    /**
+     *  initialize the MultiFormatReader with correct arguments
+     */
     private void initReader()
     {
         Map<DecodeHintType, Object> hints = new EnumMap(DecodeHintType.class);
@@ -144,6 +147,9 @@ public class Scanner
         Message.obtain(mBGHandler, MSG_SCAN).sendToTarget();
     }
 
+    /**
+     *  Call to shut down camera and stop scanner background thread
+     */
     public void kill()
     {
         awaitBGInit();
@@ -188,10 +194,6 @@ public class Scanner
      */
     private Handler createBGHandler()
     {
-        /*final Scanner scn = this;*/
-
-        Log.d(TAG, "createDBHandler");
-
         return new Handler() {
             public void handleMessage(Message msg)
             {
@@ -216,6 +218,9 @@ public class Scanner
         };
     }
 
+    /**
+     *  Initialize the camera
+     */
     private void initCameraBG()
     {
         Log.d(TAG, "BG: initializing camera");
@@ -230,6 +235,9 @@ public class Scanner
         }
     }
 
+    /**
+     *  Kill the camera
+     */
     private void killBG()
     {
         Log.d(TAG, "BG: killing camera");
@@ -258,6 +266,11 @@ public class Scanner
         Message.obtain(mUIHandler, MSG_SCAN).sendToTarget();
     }
 
+    /**
+     *  Scan
+     *  1. Obtain a preview frame
+     *  2. Pass it to decodeBG
+     */
     private void scanBG()
     {
         if (mCamera == null) {

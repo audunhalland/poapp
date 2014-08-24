@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.google.zxing.Result;
 
-public class ScanActivity extends Activity implements SurfaceHolder.Callback
+public class ScanActivity extends Activity
 {
     private static final String TAG = "ScanActivity";
 
@@ -28,12 +28,7 @@ public class ScanActivity extends Activity implements SurfaceHolder.Callback
     protected void onResume()
     {
         super.onResume();
-
-        mScanner = new Scanner(createScannerCallback());
-        mScanner.initCamera();
-
-        SurfaceView v = (SurfaceView)findViewById(R.id.preview_view);
-        v.getHolder().addCallback(this);
+        startScanning();
 
         Log.d(TAG, "onResume done");
     }
@@ -45,6 +40,41 @@ public class ScanActivity extends Activity implements SurfaceHolder.Callback
         stopScanning();
     }
 
+    void startScanning()
+    {
+        if (mScanner != null) {
+            return;
+        }
+
+        mScanner = new Scanner(createScannerCallback());
+        mScanner.initCamera();
+
+        SurfaceView v = (SurfaceView)findViewById(R.id.preview_view);
+
+        if (v.getHolder().getSurface() != null) {
+            mScanner.setPreviewDisplay(v.getHolder());
+            mScanner.scan();
+        } else {
+            v.getHolder().addCallback(new SurfaceHolder.Callback() {
+                @Override
+                public void surfaceCreated(SurfaceHolder holder) {}
+                @Override
+                public void surfaceDestroyed(SurfaceHolder holder) {}
+
+                @Override
+                public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+                {
+                    Log.d(TAG, "surfaceChanged");
+
+                    if (mScanner != null) {
+                        mScanner.setPreviewDisplay(holder);
+                        mScanner.scan();
+                    }
+                }
+            });
+        }
+    }
+
     void stopScanning()
     {
         if (mScanner != null) {
@@ -53,54 +83,35 @@ public class ScanActivity extends Activity implements SurfaceHolder.Callback
         }
     }
 
-    void showDialog(String text)
+    AlertDialog makeDialog(String title, String msg)
     {
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle(text);
-        alertDialog.setMessage(text);
-        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // here you can add functions
-            }
-        });
-        //alertDialog.setIcon(R.drawable.icon);
-        alertDialog.show();
+        AlertDialog d = new AlertDialog.Builder(this).create();
+        d.setTitle(title);
+        d.setMessage(msg);
+        return d;
     }
 
     ScannerCallback createScannerCallback()
     {
-        final ScanActivity sa = this;
-
         return new ScannerCallback() {
             public void onSuccess(Result result)
             {
-                showDialog("found: " + result.getText());
+                AlertDialog d = makeDialog("Success", result.getText());
+                d.setButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        startScanning();
+                    }
+                });
+                //alertDialog.setIcon(R.drawable.icon);
+                d.show();
                 stopScanning();
             }
 
             public void onError(String msg)
             {
-                showDialog(msg);
+                makeDialog("Error", msg).show();
             }
         };
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder)
-    {
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder)
-    {
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
-    {
-        Log.d(TAG, "surfaceChanged");
-
-        mScanner.setPreviewDisplay(holder);
-        mScanner.scan();
     }
 }
