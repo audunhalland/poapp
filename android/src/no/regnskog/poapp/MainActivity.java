@@ -44,23 +44,41 @@ public class MainActivity extends Activity
                                SCAN_REQUEST);
     }
 
+    private void showProduct(String ean, Product p)
+    {
+        String msg;
+
+        AlertDialog d = new AlertDialog.Builder(this).create();
+        if (p != null) {
+            d.setTitle(p.name);
+            d.setMessage("Innhold: " + Long.toString(p.min_po) + "-" + Long.toString(p.max_po) + "%");
+        } else {
+            d.setTitle("Unknown product");
+            d.setMessage(ean);
+        }
+
+        d.setButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which)
+            {
+            }
+        });
+
+        d.show();
+    }
+
     private void handleScanResult(int resultCode, Intent data)
     {
         if (resultCode == RESULT_OK) {
             Uri uri = data.getData();
-
-            Log.d(TAG, "scan uri: " + uri + " path: " + uri.getSchemeSpecificPart());
-
-            AlertDialog d = new AlertDialog.Builder(this).create();
-            d.setTitle("OK!");
-            d.setMessage("code: " + uri.getSchemeSpecificPart());
-            d.setButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which)
-                {
-                }
-            });
-            d.show();
+            String ean = uri.getSchemeSpecificPart();
+            showProduct(ean, Product.getFromEAN(this, ean));
         } else {
         }
+    }
+
+    public void updateClicked(View view)
+    {
+        DatabaseTest t = new DatabaseTest(this);
+        t.insertTestProducts();
     }
 }
