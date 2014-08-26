@@ -107,14 +107,10 @@
     [self stopCapture];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIAlertView *av = [[UIAlertView alloc] initWithTitle:code
-                                                     message:@""
-                                                    delegate:self
-                                           cancelButtonTitle:@"Cancel"
-                                           otherButtonTitles:@"Stuff", nil];
-        [av show];
+        /* TODO: consider having a delay here */
+        self.scannedCode = code;
+        [self performSegueWithIdentifier:@"unwindOnSuccess" sender:self];
     });
-    
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
@@ -128,7 +124,7 @@
     }];
 }
 
-/*
+
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -137,6 +133,5 @@
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
 }
-*/
 
 @end

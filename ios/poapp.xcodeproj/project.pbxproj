@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		540A5C4119ACAA4F00D46573 /* Storyboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 540A5C4019ACAA4F00D46573 /* Storyboard.storyboard */; };
 		540A5C4419ACB15000D46573 /* ScanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A5C4319ACB15000D46573 /* ScanViewController.m */; };
+		540A5C4719AD1B4100D46573 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A5C4619AD1B4100D46573 /* MainViewController.m */; };
 		541E10EA19ACA2F600758648 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 541E10E919ACA2F600758648 /* Foundation.framework */; };
 		541E10EC19ACA2F600758648 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 541E10EB19ACA2F600758648 /* CoreGraphics.framework */; };
 		541E10EE19ACA2F600758648 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 541E10ED19ACA2F600758648 /* UIKit.framework */; };
@@ -37,6 +38,8 @@
 		540A5C4019ACAA4F00D46573 /* Storyboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Storyboard.storyboard; sourceTree = "<group>"; };
 		540A5C4219ACB15000D46573 /* ScanViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScanViewController.h; sourceTree = "<group>"; };
 		540A5C4319ACB15000D46573 /* ScanViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScanViewController.m; sourceTree = "<group>"; };
+		540A5C4519AD1B4100D46573 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		540A5C4619AD1B4100D46573 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		541E10E619ACA2F600758648 /* poapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = poapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		541E10E919ACA2F600758648 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		541E10EB19ACA2F600758648 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -117,6 +120,8 @@
 				540A5C4019ACAA4F00D46573 /* Storyboard.storyboard */,
 				540A5C4219ACB15000D46573 /* ScanViewController.h */,
 				540A5C4319ACB15000D46573 /* ScanViewController.m */,
+				540A5C4519AD1B4100D46573 /* MainViewController.h */,
+				540A5C4619AD1B4100D46573 /* MainViewController.m */,
 				541E10FB19ACA2F600758648 /* Images.xcassets */,
 				541E10F019ACA2F600758648 /* Supporting Files */,
 			);
@@ -251,6 +256,7 @@
 				541E10FA19ACA2F600758648 /* AppDelegate.m in Sources */,
 				540A5C4419ACB15000D46573 /* ScanViewController.m in Sources */,
 				541E10F619ACA2F600758648 /* main.m in Sources */,
+				540A5C4719AD1B4100D46573 /* MainViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

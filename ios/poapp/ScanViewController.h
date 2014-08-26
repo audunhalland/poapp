@@ -11,5 +11,5 @@
 @import AVFoundation;
 
 @interface ScanViewController : UIViewController<AVCaptureMetadataOutputObjectsDelegate>
-
+@property NSString *scannedCode;
 @end
