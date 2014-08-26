@@ -46,8 +46,6 @@ public class MainActivity extends Activity
 
     private void showProduct(String ean, Product p)
     {
-        String msg;
-
         AlertDialog d = new AlertDialog.Builder(this).create();
         if (p != null) {
             d.setTitle(p.name);
