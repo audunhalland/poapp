@@ -8,26 +8,58 @@
 
 #import "AppDelegate.h"
 
-@implementation AppDelegate
+@implementation AppDelegate {
+    NSPersistentStore* _store;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    return [self initCoreData];
+}
+
+- (NSURL *)storeURL
+{
     NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) lastObject];
-    NSURL *storeUrl = [NSURL fileURLWithPath:[path stringByAppendingPathComponent: @"Products.sqlite"]];
+    return [NSURL fileURLWithPath:[path stringByAppendingPathComponent: @"Products.sqlite"]];
+}
+
+- (BOOL)initCoreData
+{
     NSError *error = nil;
     
     _managedObjectModel = [NSManagedObjectModel mergedModelFromBundles:nil];
     _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:_managedObjectModel];
+
+    _store = [_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+                                                       configuration:nil
+                                                                 URL:[self storeURL]
+                                                             options:nil
+                                                               error:&error];
     
-    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:nil error:&error]) {
+    if (!_store) {
         NSLog(@"problem initializing store coordinator: %@", error);
         return NO;
     }
     
     _managedObjectContext = [[NSManagedObjectContext alloc] init];
     [_managedObjectContext setPersistentStoreCoordinator:_persistentStoreCoordinator];
-    
+
     return YES;
+}
+
+- (NSError*)deleteDatabase
+{
+    NSError *err = nil;
+    [_persistentStoreCoordinator removePersistentStore:_store error:&err];
+    if (err) return err;
+    [[NSFileManager defaultManager] removeItemAtPath:[self storeURL].path error:&err];
+    if (err) return err;
+    _store = [_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+                                                       configuration:nil
+                                                                 URL:[self storeURL]
+                                                             options:nil
+                                                               error:&err];
+    return err;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

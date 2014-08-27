@@ -76,36 +76,68 @@
                                if (err) {
                                    [self syncError:err];
                                } else {
-                                   [self receivedData:data];
+                                   NSError *err = [self receivedData:data];
+                                   if (err) {
+                                       NSLog(@"error in receivedData: %@", [err localizedDescription]);
+                                   }
                                }
                            }];
 }
 
-- (void)receivedData:(NSData *)data
+- (NSError *)receivedData:(NSData *)data
 {
     NSError *err = nil;
     NSArray *array = [NSJSONSerialization JSONObjectWithData:data options:0 error:&err];
-    
-    if (err) {
-        NSLog(@"Error in JSON: %@", [err localizedDescription]);
-    }
-    
+    if (err) return err;
+
     AppDelegate *ad = (AppDelegate*)[[UIApplication sharedApplication] delegate];
+    err = [ad deleteDatabase];
+    if (err) return err;
+
     NSManagedObjectContext *moc = ad.managedObjectContext;
+    NSMutableDictionary *substances = [[NSMutableDictionary alloc] init];
+
+    {
+        NSManagedObject *po = [NSEntityDescription
+                               insertNewObjectForEntityForName:@"Substance"
+                               inManagedObjectContext:moc];
+        [po setValue:@"po" forKey:@"name"];
+        [substances setObject:po forKey:@"po"];
+    }
     
     NSLog(@"GOT DATA OF LENGTH %u", [array count]);
     
     for (id obj in array) {
         NSDictionary *dict = (NSDictionary*)obj;
         NSManagedObject *p = [NSEntityDescription
-                              insertNewObjectForEntityForName:@"Product" inManagedObjectContext:moc];
+                              insertNewObjectForEntityForName:@"Product"
+                              inManagedObjectContext:moc];
+
+        // BUG: can there be more than one ean for a product?
         [p setValue:[dict objectForKey:@"ean"] forKey:@"ean"];
         [p setValue:[dict objectForKey:@"name"] forKey:@"name"];
+
+        NSMutableSet *badIngredients = [[NSMutableSet alloc] init];
+
+        for (id idict in [dict objectForKey:@"bi"]) {
+            NSManagedObject *ingr = [NSEntityDescription
+                                     insertNewObjectForEntityForName:@"Ingredient"
+                                     inManagedObjectContext:moc];
+            [ingr setValue:[idict objectForKey:@"min"] forKey:@"percentageLowerBound"];
+            [ingr setValue:[idict objectForKey:@"max"] forKey:@"percentageHigherBound"];
+            //since there is only one supported substance (for now):
+            [ingr setValue:[substances objectForKey:[idict objectForKey:@"subst"]] forKey:@"substance"];
+            [badIngredients addObject:ingr];
+        }
+
+        [p setValue:badIngredients forKey:@"badIngredients"];
     }
     
     if (![moc save:&err]) {
         NSLog(@"Could not save products: %@", [err localizedDescription]);
     }
+
+    return nil;
 }
 
 - (void)syncError:(NSError *)error
