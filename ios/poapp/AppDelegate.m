@@ -12,6 +12,21 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) lastObject];
+    NSURL *storeUrl = [NSURL fileURLWithPath:[path stringByAppendingPathComponent: @"Products.sqlite"]];
+    NSError *error = nil;
+    
+    _managedObjectModel = [NSManagedObjectModel mergedModelFromBundles:nil];
+    _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:_managedObjectModel];
+    
+    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:nil error:&error]) {
+        NSLog(@"problem initializing store coordinator: %@", error);
+        return NO;
+    }
+    
+    _managedObjectContext = [[NSManagedObjectContext alloc] init];
+    [_managedObjectContext setPersistentStoreCoordinator:_persistentStoreCoordinator];
+    
     return YES;
 }
 

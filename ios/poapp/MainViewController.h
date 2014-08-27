@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface MainViewController : UIViewController
+- (IBAction)refresh:(id)sender;
 - (IBAction)didUnwindTo:(UIStoryboardSegue *)segue;
 @end

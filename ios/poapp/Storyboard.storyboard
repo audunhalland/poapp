@@ -28,7 +28,13 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Main" id="v9h-JM-YoJ"/>
+                    <navigationItem key="navigationItem" title="Main" id="v9h-JM-YoJ">
+                        <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="BAl-YA-e4h">
+                            <connections>
+                                <action selector="refresh:" destination="ggi-0c-U2a" id="bWk-sv-J1D"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xKD-sJ-Eel" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
