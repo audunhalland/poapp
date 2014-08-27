@@ -57,12 +57,66 @@
 
 - (void)handleScannedCode:(NSString*)code
 {
-    UIAlertView *av = [[UIAlertView alloc] initWithTitle:code
-                                                 message:@""
-                                                delegate:self
-                                       cancelButtonTitle:@"Cancel"
-                                       otherButtonTitles:@"Stuff", nil];
-    [av show];
+    /*
+
+     */
+    NSManagedObject *product = [self productForEan:code];
+
+    if (product) {
+        NSSet *badIngredients = [product valueForKey:@"badIngredients"];
+        NSString *desc = nil;
+
+        if ([badIngredients count] == 0) {
+            desc = @"no bad ingredients";
+        } else {
+            NSMutableString *s = [[NSMutableString alloc] init];
+            for (NSManagedObject *bi in badIngredients) {
+                NSString *bis = [NSString stringWithFormat:@"contains %@-%@%% %@\n",
+                                  [bi valueForKey:@"percentageLowerBound"],
+                                  [bi valueForKey:@"percentageHigherBound"],
+                                 [[bi valueForKey:@"substance"] valueForKey:@"name"]];
+
+                [s appendString: bis];
+            }
+            desc = s;
+        }
+
+        [[[UIAlertView alloc] initWithTitle:[product valueForKey:@"name"]
+                                    message:desc
+                                   delegate:self
+                          cancelButtonTitle:@"Cancel"
+                          otherButtonTitles:@"Stuff", nil] show];
+    } else {
+        [[[UIAlertView alloc] initWithTitle:@"Not found"
+                                    message:code
+                                   delegate:self
+                          cancelButtonTitle:@"Cancel"
+                          otherButtonTitles:@"Stuff", nil] show];
+    }
+}
+
+- (NSManagedObject *)productForEan:(NSString *)ean
+{
+    AppDelegate *ad = (AppDelegate*)[[UIApplication sharedApplication] delegate];
+    NSManagedObjectContext *moc = ad.managedObjectContext;
+    NSFetchRequest *fr = [[NSFetchRequest alloc] init];
+    NSError *err = nil;
+
+    [fr setEntity:[NSEntityDescription entityForName:@"Product" inManagedObjectContext:moc]];
+    [fr setPredicate:[NSPredicate predicateWithFormat:@"ean == %@", ean]];
+
+    NSArray *a = [moc executeFetchRequest:fr error:&err];
+
+    if (err) {
+        NSLog(@"Error: %@", [err localizedDescription]);
+        return nil;
+    }
+
+    if ([a count] == 1) {
+        return [a objectAtIndex:0];
+    } else {
+        return nil;
+    }
 }
 
 - (void)testSync
@@ -135,6 +189,18 @@
     
     if (![moc save:&err]) {
         NSLog(@"Could not save products: %@", [err localizedDescription]);
+    }
+
+    // DEBUG!
+    {
+        NSFetchRequest *fr = [[NSFetchRequest alloc] init];
+        NSEntityDescription *ed = [NSEntityDescription entityForName:@"Product" inManagedObjectContext:moc];
+        [fr setEntity:ed];
+        NSArray *a = [moc executeFetchRequest:fr error:&err];
+
+        for (NSManagedObject *obj in a) {
+            NSLog(@"product %@ with %u bad ingredients", [obj valueForKey:@"name"], [[obj valueForKey:@"badIngredients"] count]);
+        }
     }
 
     return nil;

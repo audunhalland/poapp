@@ -32,13 +32,16 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+
     if ([self setupCaptureSession]) {
         _previewLayer.frame = _previewView.bounds;
         [_previewView.layer addSublayer:_previewLayer];
         
         _metadataOutput.metadataObjectTypes = @[@"org.gs1.EAN-13"];
     } else {
+        // Test product
+        self.scannedCode = @"7311041019993";
+        //self.scannedCode = @"7311041019992";
         NSLog(@"Error setting up capture session");
     }
 }
