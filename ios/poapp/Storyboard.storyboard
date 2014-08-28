@@ -47,7 +47,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xKD-sJ-Eel" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="790" y="68"/>
+            <point key="canvasLocation" x="236" y="220"/>
         </scene>
         <!--Scan View Controller - Scan!-->
         <scene sceneID="dYu-Yc-bGl">
@@ -84,7 +84,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="d7X-Vl-F8x" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="bOU-fc-U66" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1792" y="74"/>
+            <point key="canvasLocation" x="1226" y="-574"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="vin-b3-FY5">
@@ -102,7 +102,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BJz-O1-cH3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1266" y="74"/>
+            <point key="canvasLocation" x="712" y="-574"/>
         </scene>
         <!--Product Table View Controller-->
         <scene sceneID="FPU-AW-tdP">
@@ -113,7 +113,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Default" textLabel="fV0-V4-xRw" style="IBUITableViewCellStyleDefault" id="68o-KR-wEM">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="default" textLabel="fV0-V4-xRw" style="IBUITableViewCellStyleDefault" id="68o-KR-wEM">
                                 <rect key="frame" x="0.0" y="86" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="68o-KR-wEM" id="M1S-go-JUA">
@@ -140,7 +140,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jxc-rJ-9T6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1266" y="808"/>
+            <point key="canvasLocation" x="712" y="220"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="TDi-7M-kjG">
@@ -158,7 +158,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="49j-dw-ehr" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="264" y="68"/>
+            <point key="canvasLocation" x="-290" y="220"/>
         </scene>
     </scenes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">

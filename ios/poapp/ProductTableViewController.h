@@ -10,6 +10,6 @@
 
 #import <CoreData/CoreData.h>
 
-@interface ProductTableViewController : UITableViewController<NSFetchedResultsControllerDelegate>
+@interface ProductTableViewController : UITableViewController<NSFetchedResultsControllerDelegate, UISearchDisplayDelegate>
 
 @end

@@ -200,18 +200,6 @@
         NSLog(@"Could not save products: %@", [err localizedDescription]);
     }
 
-    // DEBUG!
-    {
-        NSFetchRequest *fr = [[NSFetchRequest alloc] init];
-        NSEntityDescription *ed = [NSEntityDescription entityForName:@"Product" inManagedObjectContext:moc];
-        [fr setEntity:ed];
-        NSArray *a = [moc executeFetchRequest:fr error:&err];
-
-        for (NSManagedObject *obj in a) {
-            NSLog(@"product %@ with %u bad ingredients", [obj valueForKey:@"name"], [[obj valueForKey:@"badIngredients"] count]);
-        }
-    }
-
     dispatch_async(dispatch_get_main_queue(), ^{
         /* TODO: consider having a delay here */
         [self syncDone];

@@ -11,6 +11,8 @@
 
 @interface ProductTableViewController ()
 @property (strong, nonatomic) NSFetchedResultsController *fetchController;
+@property (strong, nonatomic) UISearchDisplayController *searchController;
+@property (strong, nonatomic) NSFetchedResultsController *searchFetchController;
 @end
 
 @implementation ProductTableViewController
@@ -31,6 +33,12 @@
     [NSFetchedResultsController deleteCacheWithName:@"ProductCache"];
     [self setupFetch];
 
+    UISearchBar *bar = [[UISearchBar alloc] init];
+    _searchController = [[UISearchDisplayController alloc] initWithSearchBar:bar contentsController:self];
+    _searchController.displaysSearchBarInNavigationBar = YES;
+    _searchController.searchResultsDataSource = self;
+    _searchController.delegate = self;
+
     NSError *err = nil;
 
     if (![_fetchController performFetch:&err]) {
@@ -50,23 +58,50 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)setupFetch
+- (NSManagedObjectContext *)getMOC
 {
     AppDelegate *ad = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-    NSManagedObjectContext *moc = ad.managedObjectContext;
+    return ad.managedObjectContext;
+}
 
+- (NSFetchRequest *)makeFetchRequest
+{
     NSFetchRequest *fr = [[NSFetchRequest alloc] init];
-    [fr setEntity:[NSEntityDescription entityForName:@"Product" inManagedObjectContext:moc]];
+    [fr setEntity:[NSEntityDescription entityForName:@"Product" inManagedObjectContext:[self getMOC]]];
     [fr setSortDescriptors:
      [NSArray arrayWithObject:[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES]]];
+    return fr;
+}
+
+- (void)setupFetch
+{
+
 
     _fetchController = [[NSFetchedResultsController alloc]
-                        initWithFetchRequest:fr
-                        managedObjectContext:moc
+                        initWithFetchRequest:[self makeFetchRequest]
+                        managedObjectContext:[self getMOC]
                         sectionNameKeyPath:nil
                         cacheName:@"ProductCache"];
+    _searchFetchController = [[NSFetchedResultsController alloc]
+                              initWithFetchRequest:[self makeFetchRequest]
+                              managedObjectContext:[self getMOC]
+                              sectionNameKeyPath:nil
+                              cacheName:nil];
 
     _fetchController.delegate = self;
+    _searchFetchController.delegate = self;
+}
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    NSPredicate *p = [NSPredicate predicateWithFormat:@"name contains[cd] %@", searchString];
+
+    NSError *err = nil;
+
+    [_searchFetchController.fetchRequest setPredicate:p];
+    [_searchFetchController performFetch:&err];
+
+    return YES;
 }
 
 #pragma mark - Table view data source
@@ -74,22 +109,25 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return [[_fetchController sections] count];
+    NSFetchedResultsController * c = (tableView == self.tableView ? _fetchController : _searchFetchController);
+    return [[c sections] count];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    NSFetchedResultsController * c = (tableView == self.tableView ? _fetchController : _searchFetchController);
     // Return the number of rows in the section.
-    id sectionInfo = [[_fetchController sections] objectAtIndex:section];
+    id sectionInfo = [[c sections] objectAtIndex:section];
     return [sectionInfo numberOfObjects];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Default" forIndexPath:indexPath];
+    NSFetchedResultsController * c = (tableView == self.tableView ? _fetchController : _searchFetchController);
+    UITableViewCell *cell = [self.tableView dequeueReusableCellWithIdentifier:@"default" forIndexPath:indexPath];
     
     // Configure the cell...
-    NSManagedObject *product = [_fetchController objectAtIndexPath:indexPath];
+    NSManagedObject *product = [c objectAtIndexPath:indexPath];
     cell.textLabel.text = [product valueForKey:@"name"];
 
     return cell;
