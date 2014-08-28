@@ -22,6 +22,7 @@
 		541E110519ACA2F600758648 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 541E10ED19ACA2F600758648 /* UIKit.framework */; };
 		541E110D19ACA2F600758648 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 541E110B19ACA2F600758648 /* InfoPlist.strings */; };
 		541E110F19ACA2F600758648 /* poappTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E110E19ACA2F600758648 /* poappTests.m */; };
+		546AFA2C19AF4B1B0000FC87 /* ProductTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 546AFA2B19AF4B1B0000FC87 /* ProductTableViewController.m */; };
 		54D41C2819ADF1D400E72677 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54D41C2719ADF1D400E72677 /* CoreData.framework */; };
 		54D41C2E19ADF25400E72677 /* Products.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 54D41C2C19ADF25400E72677 /* Products.xcdatamodeld */; };
 /* End PBXBuildFile section */
@@ -58,6 +59,8 @@
 		541E110A19ACA2F600758648 /* poappTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "poappTests-Info.plist"; sourceTree = "<group>"; };
 		541E110C19ACA2F600758648 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		541E110E19ACA2F600758648 /* poappTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = poappTests.m; sourceTree = "<group>"; };
+		546AFA2A19AF4B1B0000FC87 /* ProductTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProductTableViewController.h; sourceTree = "<group>"; };
+		546AFA2B19AF4B1B0000FC87 /* ProductTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProductTableViewController.m; sourceTree = "<group>"; };
 		54D41C2719ADF1D400E72677 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		54D41C2D19ADF25400E72677 /* Products.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Products.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -125,6 +128,8 @@
 				541E10F819ACA2F600758648 /* AppDelegate.h */,
 				541E10F919ACA2F600758648 /* AppDelegate.m */,
 				540A5C4019ACAA4F00D46573 /* Storyboard.storyboard */,
+				546AFA2A19AF4B1B0000FC87 /* ProductTableViewController.h */,
+				546AFA2B19AF4B1B0000FC87 /* ProductTableViewController.m */,
 				540A5C4219ACB15000D46573 /* ScanViewController.h */,
 				540A5C4319ACB15000D46573 /* ScanViewController.m */,
 				540A5C4519AD1B4100D46573 /* MainViewController.h */,
@@ -265,6 +270,7 @@
 				541E10F619ACA2F600758648 /* main.m in Sources */,
 				54D41C2E19ADF25400E72677 /* Products.xcdatamodeld in Sources */,
 				540A5C4719AD1B4100D46573 /* MainViewController.m in Sources */,
+				546AFA2C19AF4B1B0000FC87 /* ProductTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

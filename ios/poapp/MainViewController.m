@@ -11,6 +11,8 @@
 #import "AppDelegate.h"
 
 @interface MainViewController ()
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *testRefreshButton;
+@property (weak, nonatomic) IBOutlet UIButton *scanButton;
 
 @end
 
@@ -57,9 +59,6 @@
 
 - (void)handleScannedCode:(NSString*)code
 {
-    /*
-
-     */
     NSManagedObject *product = [self productForEan:code];
 
     if (product) {
@@ -123,7 +122,11 @@
 {
     NSString *path = @"http://audunhalland.com/podb/po.php";
     NSURL *url = [[NSURL alloc] initWithString:path];
-    
+
+    // disable rest of UI
+    [_testRefreshButton setEnabled:NO];
+    [_scanButton setEnabled:NO];
+
     [NSURLConnection sendAsynchronousRequest:[[NSURLRequest alloc] initWithURL:url]
                                        queue:[[NSOperationQueue alloc] init]
                            completionHandler:^(NSURLResponse *response, NSData *data, NSError *err) {
@@ -136,6 +139,12 @@
                                    }
                                }
                            }];
+}
+
+- (void)syncDone
+{
+    [_testRefreshButton setEnabled:YES];
+    [_scanButton setEnabled:YES];
 }
 
 - (NSError *)receivedData:(NSData *)data
@@ -202,6 +211,11 @@
             NSLog(@"product %@ with %u bad ingredients", [obj valueForKey:@"name"], [[obj valueForKey:@"badIngredients"] count]);
         }
     }
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        /* TODO: consider having a delay here */
+        [self syncDone];
+    });
 
     return nil;
 }
