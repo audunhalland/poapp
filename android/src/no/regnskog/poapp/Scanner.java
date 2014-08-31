@@ -38,12 +38,15 @@ public class Scanner
 
     private static final int MSG_INIT_CAMERA = 0;
     private static final int MSG_SET_PREVIEW_DISPLAY = 1;
-    private static final int MSG_SCAN = 2;
-    private static final int MSG_SCAN_SUCCEEDED = 3;
-    private static final int MSG_SCAN_UNRECOGNIZED = 4;
-    private static final int MSG_SCAN_ERROR = 5;
-    private static final int MSG_CAMERA_ERROR = 6;
-    private static final int MSG_KILL = 7;
+    private static final int MSG_AUTO_FOCUS = 2;
+    private static final int MSG_SCAN = 3;
+    private static final int MSG_SCAN_SUCCEEDED = 4;
+    private static final int MSG_SCAN_UNRECOGNIZED = 5;
+    private static final int MSG_SCAN_ERROR = 6;
+    private static final int MSG_CAMERA_ERROR = 7;
+    private static final int MSG_KILL = 8;
+
+    private static final long AUTO_FOCUS_INTERVAL = 2000L;
 
     ScannerCallback mCallback;
     Camera mCamera;
@@ -204,6 +207,9 @@ public class Scanner
                 case MSG_SET_PREVIEW_DISPLAY:
                     setPreviewDisplayBG((SurfaceHolder)msg.obj);
                     break;
+                case MSG_AUTO_FOCUS:
+                    autoFocusBG();
+                    break;
                 case MSG_SCAN:
                     scanBG();
                     break;
@@ -233,6 +239,8 @@ public class Scanner
 
             Message.obtain(mUIHandler, MSG_CAMERA_ERROR).sendToTarget();
         }
+
+        mCamera.setDisplayOrientation(90);
     }
 
     /**
@@ -262,8 +270,9 @@ public class Scanner
             return;
         }
 
-        // send message to ourselves to start scanning
+        // send message to ourselves to start scanning, and do autofocus
         Message.obtain(mUIHandler, MSG_SCAN).sendToTarget();
+        Message.obtain(mBGHandler, MSG_AUTO_FOCUS).sendToTarget();
     }
 
     /**
@@ -328,6 +337,25 @@ public class Scanner
             Log.d(TAG, "scanBG: unrecognized");
             /* rescan! */
             Message.obtain(mBGHandler, MSG_SCAN).sendToTarget();
+        }
+    }
+
+    /**
+     *  Do auto focus
+     */
+    private void autoFocusBG()
+    {
+        Camera.Parameters p = mCamera.getParameters();
+
+        if (p.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
+            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                public void onAutoFocus(boolean success, Camera camera)
+                {
+                    Message msg = new Message();
+                    msg.what = MSG_AUTO_FOCUS;
+                    mBGHandler.sendMessageDelayed(msg, AUTO_FOCUS_INTERVAL);
+                }
+            });
         }
     }
 }
