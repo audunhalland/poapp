@@ -56,8 +56,6 @@ class Sync {
         mProductStmt.bindString(2, p.name);
         p.id = mProductStmt.executeInsert();
 
-        Log.d(TAG, "saved product: " + p.name + " " + p.ean + " id was: " + p.id);
-
         for (int i = 0; i < p.badIngredients.length; ++i) {
             mBadIngrStmt.bindLong(1, p.id);
             mBadIngrStmt.bindLong(2, p.badIngredients[i].id);
@@ -73,6 +71,8 @@ class Sync {
         } else {
             s = new Product.Substance();
             s.name = name;
+            s.info = "";
+            saveSubstance(s);
             mSubstances.put(name, s);
             return s;
         }
@@ -154,10 +154,15 @@ class Sync {
             ("INSERT INTO bad_ingredient (product_id, ingredient_id) VALUES (?, ?)");
     }
 
+    /**
+     *  Sync top level json description document
+     *  format is array of products
+     */
     private void sync(JsonReader reader) throws IOException
     {
         openDB();
 
+        Log.d(TAG, "sql: begin transaction, network bound");
         mDatabase.beginTransaction();
 
         try {
@@ -166,11 +171,12 @@ class Sync {
                 saveProduct(readProduct(reader));
             }
             reader.endArray();
+            mDatabase.setTransactionSuccessful();
         } catch (SQLException e) {
             Log.e(TAG, "sql exception: " + e.toString());
         } finally {
-            Log.e(TAG, "sql: ending transaction!");
             mDatabase.endTransaction();
+            Log.d(TAG, "sql: transaction ended");
         }
     }
 

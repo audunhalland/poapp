@@ -49,7 +49,7 @@ public class MainActivity extends Activity
         AlertDialog d = new AlertDialog.Builder(this).create();
         if (p != null) {
             d.setTitle(p.name);
-            d.setMessage("Innhold: " + Long.toString(p.min_po) + "-" + Long.toString(p.max_po) + "%");
+            //d.setMessage("Innhold: " + Long.toString(p.min) + "-" + Long.toString(p.max) + "%");
         } else {
             d.setTitle("Unknown product");
             d.setMessage(ean);
