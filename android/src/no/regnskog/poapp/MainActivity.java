@@ -76,7 +76,9 @@ public class MainActivity extends Activity
 
     public void updateClicked(View view)
     {
-        DatabaseTest t = new DatabaseTest(this);
-        t.insertTestProducts();
+        //DatabaseTest t = new DatabaseTest(this);
+        //t.insertTestProducts();
+        Sync sync = new Sync(this);
+        sync.perform();
     }
 }

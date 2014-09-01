@@ -31,6 +31,8 @@ import com.google.zxing.Result;
  *  3. publish code
  *
  *  kill() must be called in order to close camera and free all resources.
+ *
+ *  BUG: Should instead use scan intent!
  */
 public class Scanner
 {
