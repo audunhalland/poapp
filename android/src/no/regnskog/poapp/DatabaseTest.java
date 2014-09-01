@@ -13,6 +13,7 @@ class DatabaseTest
         mContext = context;
     }
 
+    /*
     SQLiteStatement getInsertProductStatement()
     {
         DatabaseOpenHelper doh = new DatabaseOpenHelper(mContext);
@@ -36,4 +37,5 @@ class DatabaseTest
         SQLiteStatement s = getInsertProductStatement();
         insertProduct(s, "7311041019993", "Batterier", 40, 50);
     }
+    */
 }

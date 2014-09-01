@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 class Product
 {
     public static class Substance {
-        int id;
+        long id;
         String name;
         String info;
 
@@ -28,10 +28,10 @@ class Product
     }
 
     public static class Ingredient {
-        int id;
-        int percentMin;
-        int percentMax;
-        Substance substance;
+        public long id;
+        public int min;
+        public int max;
+        public Substance substance;
 
         @Override
         public boolean equals(Object obj)
@@ -40,25 +40,23 @@ class Product
             if (!(obj instanceof Ingredient)) return false;
 
             Ingredient i2 = (Ingredient)obj;
-            return id == i2.id && percentMin == i2.percentMin &&
-                percentMax == i2.percentMax && substance == i2.substance;
+            return min == i2.min && max == i2.max && substance == i2.substance;
         }
 
         @Override
         public int hashCode() {
             int result = 17;
-            result = 31 * result + id;
-            result = 31 * result + percentMin;
-            result = 31 * result + percentMax;
+            result = 31 * result + min;
+            result = 31 * result + max;
             result = 31 * result + substance.hashCode();
             return result;
         }
     }
 
+    public long id;
     public String ean;
     public String name;
-    public long min_po;
-    public long max_po;
+    public Ingredient[] badIngredients;
     public String category;
     public String manufacturer;
 
@@ -75,8 +73,8 @@ class Product
             Product p = new Product();
             p.ean = ean;
             p.name = c.getString(0);
-            p.min_po = c.getLong(1);
-            p.max_po = c.getLong(2);
+            //p.min_po = c.getLong(1);
+            //p.max_po = c.getLong(2);
             p.category = null;
             p.manufacturer = null;
             return p;

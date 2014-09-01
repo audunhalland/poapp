@@ -17,20 +17,17 @@ class DatabaseOpenHelper extends SQLiteOpenHelper
     public void onCreate(SQLiteDatabase db)
     {
         db.execSQL("CREATE TABLE product (" +
-                   "id INTEGER NOT NULL, " +
+                   "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                   // BUG: multiple ean per product?
                    "ean TEXT NOT NULL, " +
                    "name TEXT NOT NULL, " +
-                   "po_percent_min INTEGER NOT NULL, " +
-                   "po_percent_max INTEGER NOT NULL, " +
                    "category_id INTEGER, " +
-                   "manufacturer_id INTEGER, " +
-                   // BUG: multiple ean per product?
-                   "PRIMARY KEY(id, ean)" +
+                   "manufacturer_id INTEGER " +
                    ")");
         db.execSQL("CREATE TABLE ingredient (" +
                    "id INTEGER PRIMARY KEY, " +
-                   "percentage_min INTEGER NOT NULL, " +
-                   "percentage_max INTEGER NOT NULL, " +
+                   "min INTEGER NOT NULL, " +
+                   "max INTEGER NOT NULL, " +
                    "substance_id INTEGER NOT NULL," +
                    "FOREIGN KEY (substance_id) REFERENCES substance(id)" +
                    ")");
@@ -39,9 +36,10 @@ class DatabaseOpenHelper extends SQLiteOpenHelper
                    "name TEXT, " +
                    "info TEXT " +
                    ")");
-        db.execSQL("CREATE TABLE product_ingredient (" +
+        db.execSQL("CREATE TABLE bad_ingredient (" +
                    "product_id INTEGER NOT NULL, " +
                    "ingredient_id INTEGER NOT NULL, " +
+                   "PRIMARY KEY (product_id, ingredient_id), " +
                    "FOREIGN KEY (product_id) REFERENCES product(id), " +
                    "FOREIGN KEY (ingredient_id) REFERENCES ingredient(id)" +
                    ")");

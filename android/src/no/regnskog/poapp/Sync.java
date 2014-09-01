@@ -2,6 +2,7 @@ package no.regnskog.poapp;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.database.SQLException;
 import android.util.Log;
 import com.google.gson.stream.JsonReader;
@@ -9,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -18,6 +20,11 @@ class Sync {
     Context mContext;
     SQLiteDatabase mDatabase;
 
+    SQLiteStatement mSubstanceStmt;
+    SQLiteStatement mIngredientStmt;
+    SQLiteStatement mProductStmt;
+    SQLiteStatement mBadIngrStmt;
+
     Map<String, Product.Substance> mSubstances;
     Map<Product.Ingredient, Product.Ingredient> mIngredients;
 
@@ -26,6 +33,36 @@ class Sync {
         mContext = c;
         mSubstances = new HashMap<String, Product.Substance>();
         mIngredients = new HashMap<Product.Ingredient, Product.Ingredient>();
+    }
+
+    private void saveSubstance(Product.Substance s)
+    {
+        mSubstanceStmt.bindString(1, s.name);
+        mSubstanceStmt.bindString(2, s.info);
+        s.id = mSubstanceStmt.executeInsert();
+    }
+
+    private void saveIngredient(Product.Ingredient i)
+    {
+        mIngredientStmt.bindLong(1, i.min);
+        mIngredientStmt.bindLong(2, i.max);
+        mIngredientStmt.bindLong(3, i.substance.id);
+        i.id = mIngredientStmt.executeInsert();
+    }
+
+    private void saveProduct(Product p)
+    {
+        mProductStmt.bindString(1, p.ean);
+        mProductStmt.bindString(2, p.name);
+        p.id = mProductStmt.executeInsert();
+
+        Log.d(TAG, "saved product: " + p.name + " " + p.ean + " id was: " + p.id);
+
+        for (int i = 0; i < p.badIngredients.length; ++i) {
+            mBadIngrStmt.bindLong(1, p.id);
+            mBadIngrStmt.bindLong(2, p.badIngredients[i].id);
+            mBadIngrStmt.execute();
+        }
     }
 
     private Product.Substance getSubstance(String name)
@@ -53,9 +90,9 @@ class Sync {
             if (property.equals("subst")) {
                 i.substance = getSubstance(reader.nextString());
             } else if (property.equals("min")) {
-                i.percentMin = reader.nextInt();
+                i.min = reader.nextInt();
             } else if (property.equals("max")) {
-                i.percentMax = reader.nextInt();
+                i.max = reader.nextInt();
             } else {
                 reader.skipValue();
             }
@@ -67,8 +104,8 @@ class Sync {
         if (existing != null) {
             return existing;
         } else {
-            Log.d(TAG, "new ingredient: " + i.substance.name);
             mIngredients.put(i, i);
+            saveIngredient(i);
             return i;
         }
     }
@@ -86,11 +123,13 @@ class Sync {
             } else if (property.equals("name")) {
                 p.name = reader.nextString();
             } else if (property.equals("bi")) {
+                ArrayList<Product.Ingredient> bi = new ArrayList<Product.Ingredient>();
                 reader.beginArray();
                 while (reader.hasNext()) {
-                    Product.Ingredient i = readIngredient(reader);
+                    bi.add(readIngredient(reader));
                 }
                 reader.endArray();
+                p.badIngredients = bi.toArray(new Product.Ingredient[bi.size()]);
             } else {
                 reader.skipValue();
             }
@@ -100,22 +139,37 @@ class Sync {
         return p;
     }
 
-    private void sync(JsonReader reader) throws IOException
+    private void openDB()
     {
         DatabaseOpenHelper doh = new DatabaseOpenHelper(mContext);
         mDatabase = doh.getWritableDatabase();
+
+        mSubstanceStmt = mDatabase.compileStatement
+            ("INSERT INTO substance (name, info) VALUES (?, ?)");
+        mIngredientStmt = mDatabase.compileStatement
+            ("INSERT INTO ingredient (min, max, substance_id) VALUES (?, ?, ?)");
+        mProductStmt = mDatabase.compileStatement
+            ("INSERT INTO product (ean, name) VALUES (?, ?)");
+        mBadIngrStmt = mDatabase.compileStatement
+            ("INSERT INTO bad_ingredient (product_id, ingredient_id) VALUES (?, ?)");
+    }
+
+    private void sync(JsonReader reader) throws IOException
+    {
+        openDB();
 
         mDatabase.beginTransaction();
 
         try {
             reader.beginArray();
             while (reader.hasNext()) {
-                Product p = readProduct(reader);
+                saveProduct(readProduct(reader));
             }
             reader.endArray();
         } catch (SQLException e) {
             Log.e(TAG, "sql exception: " + e.toString());
         } finally {
+            Log.e(TAG, "sql: ending transaction!");
             mDatabase.endTransaction();
         }
     }
