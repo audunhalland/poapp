@@ -158,7 +158,7 @@ class Sync {
      *  Sync top level json description document
      *  format is array of products
      */
-    private void sync(JsonReader reader) throws IOException
+    public void sync(JsonReader reader) throws IOException
     {
         openDB();
 
