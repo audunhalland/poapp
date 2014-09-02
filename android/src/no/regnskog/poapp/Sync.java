@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.database.SQLException;
 import android.util.Log;
 import com.google.gson.stream.JsonReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -16,6 +17,9 @@ import java.util.HashMap;
 
 class Sync {
     private static final String TAG = "Sync";
+
+    URL mURL;
+    HttpURLConnection mConnection;
 
     Context mContext;
     SQLiteDatabase mDatabase;
@@ -31,6 +35,11 @@ class Sync {
     public Sync(Context c)
     {
         mContext = c;
+        try {
+            mURL = new URL("http://audunhalland.com/podb/po.php");
+        } catch (Exception e) {
+            assert(false);
+        }
         mSubstances = new HashMap<String, Product.Substance>();
         mIngredients = new HashMap<Product.Ingredient, Product.Ingredient>();
     }
@@ -56,10 +65,12 @@ class Sync {
         mProductStmt.bindString(2, p.name);
         p.id = mProductStmt.executeInsert();
 
-        for (int i = 0; i < p.badIngredients.length; ++i) {
-            mBadIngrStmt.bindLong(1, p.id);
-            mBadIngrStmt.bindLong(2, p.badIngredients[i].id);
-            mBadIngrStmt.execute();
+        if (p.badIngredients != null) {
+            for (int i = 0; i < p.badIngredients.length; ++i) {
+                mBadIngrStmt.bindLong(1, p.id);
+                mBadIngrStmt.bindLong(2, p.badIngredients[i].id);
+                mBadIngrStmt.execute();
+            }
         }
     }
 
@@ -158,8 +169,9 @@ class Sync {
      *  Sync top level json description document
      *  format is array of products
      */
-    public void sync(JsonReader reader) throws IOException
+    private boolean sync(JsonReader reader) throws IOException
     {
+        boolean result = false;
         openDB();
 
         Log.d(TAG, "sql: begin transaction, network bound");
@@ -172,26 +184,42 @@ class Sync {
             }
             reader.endArray();
             mDatabase.setTransactionSuccessful();
+            result = true;
         } catch (SQLException e) {
             Log.e(TAG, "sql exception: " + e.toString());
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "illegal argument (can't put into database): " + e.toString());
         } finally {
             mDatabase.endTransaction();
             Log.d(TAG, "sql: transaction ended");
         }
+
+        return result;
     }
 
-    public void perform()
+    /**
+     *  Get the json input stream
+     */
+    protected InputStream getInputStream() throws IOException
+    {
+        mConnection = (HttpURLConnection)mURL.openConnection();
+        return mConnection.getInputStream();
+    }
+
+    /**
+     *  Perform sync synchronously
+     */
+    public boolean perform()
     {
         if (mContext.deleteDatabase("db")) {
             Log.d(TAG, "database deleted");
         }
 
         try {
-            URL url = new URL("http://audunhalland.com/podb/po.php");
-            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-            sync(new JsonReader(new InputStreamReader(conn.getInputStream())));
+            return sync(new JsonReader(new InputStreamReader(getInputStream())));
         } catch (IOException e) {
             Log.e(TAG, "IO exception: " + e.toString());
+            return false;
         }
     }
 

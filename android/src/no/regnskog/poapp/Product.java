@@ -64,24 +64,19 @@ class Product
     {
         DatabaseOpenHelper doh = new DatabaseOpenHelper(context);
         SQLiteDatabase db = doh.getWritableDatabase();
-        String q =
-            "SELECT name, po_percent_min, po_percent_max FROM product " +
-            "WHERE ean = ?";
-        Cursor c = db.rawQuery(q, new String[]{ean});
+        Cursor c = db.rawQuery("SELECT id, name FROM product WHERE ean = ?", new String[]{ean});
 
         if (c.moveToFirst()) {
             Product p = new Product();
             p.ean = ean;
-            p.name = c.getString(0);
-            //p.min_po = c.getLong(1);
-            //p.max_po = c.getLong(2);
+            p.id = c.getLong(0);
+            p.name = c.getString(1);
             p.category = null;
             p.manufacturer = null;
             return p;
         } else {
             return null;
         }
-
     }
 
     public String toString()
