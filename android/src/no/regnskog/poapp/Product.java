@@ -3,6 +3,7 @@ package no.regnskog.poapp;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import java.util.ArrayList;
 
 class Product
 {
@@ -29,8 +30,8 @@ class Product
 
     public static class Ingredient {
         public long id;
-        public int min;
-        public int max;
+        public long min;
+        public long max;
         public Substance substance;
 
         @Override
@@ -46,8 +47,8 @@ class Product
         @Override
         public int hashCode() {
             int result = 17;
-            result = 31 * result + min;
-            result = 31 * result + max;
+            result = 31 * result + (int)min;
+            result = 31 * result + (int)max;
             result = 31 * result + substance.hashCode();
             return result;
         }
@@ -60,10 +61,44 @@ class Product
     public String category;
     public String manufacturer;
 
+    private static Ingredient[] getBadIngredientsFromProductId(SQLiteDatabase db, long productId)
+    {
+        final String q =
+            "SELECT ingredient.id, ingredient.min, ingredient.max, " +
+            "substance.id, substance.name, substance.info " +
+            "FROM ingredient " +
+            "JOIN substance ON ingredient.substance_id = substance.id " +
+            "JOIN bad_ingredient ON bad_ingredient.ingredient_id = ingredient.id " +
+            "WHERE bad_ingredient.product_id = " + productId;
+
+        Cursor c = db.rawQuery(q, new String[]{});
+
+        if (c.moveToFirst()) {
+            ArrayList<Ingredient> bi = new ArrayList<Ingredient>();
+
+            do {
+                Ingredient ingr = new Ingredient();
+                Substance subst = new Substance();
+                ingr.id = c.getLong(0);
+                ingr.min = c.getLong(1);
+                ingr.max = c.getLong(2);
+                subst.id = c.getLong(3);
+                subst.name = c.getString(4);
+                subst.info = c.getString(5);
+                ingr.substance = subst;
+                bi.add(ingr);
+            } while (c.moveToNext());
+
+            return bi.toArray(new Ingredient[bi.size()]);
+        } else {
+            return new Ingredient[0];
+        }
+    }
+
     public static Product getFromEAN(Context context, String ean)
     {
         DatabaseOpenHelper doh = new DatabaseOpenHelper(context);
-        SQLiteDatabase db = doh.getWritableDatabase();
+        SQLiteDatabase db = doh.getReadableDatabase();
         Cursor c = db.rawQuery("SELECT id, name FROM product WHERE ean = ?", new String[]{ean});
 
         if (c.moveToFirst()) {
@@ -71,6 +106,7 @@ class Product
             p.ean = ean;
             p.id = c.getLong(0);
             p.name = c.getString(1);
+            p.badIngredients = getBadIngredientsFromProductId(db, p.id);
             p.category = null;
             p.manufacturer = null;
             return p;

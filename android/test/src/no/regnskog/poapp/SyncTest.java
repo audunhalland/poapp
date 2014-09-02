@@ -37,13 +37,14 @@ public class SyncTest extends AndroidTestCase
         return array;
     }
 
-    private void syncOneValidProduct(JSONObject obj, String ean)
+    private Product syncOneValidProduct(JSONObject obj, String ean)
     {
         syncJSON(oneSizedArray(obj).toString());
 
         Product p = Product.getFromEAN(getContext(), ean);
         assertNotNull(p);
         assertEquals(p.ean, ean);
+        return p;
     }
 
     private void syncOneInvalidProduct(JSONObject obj)
@@ -93,8 +94,43 @@ public class SyncTest extends AndroidTestCase
         JSONObject obj = new JSONObject();
         JSONArray bi = new JSONArray();
         obj.put("ean", ean);
-        obj.put("name", "Test product 2");
+        obj.put("name", "Test product 3");
         obj.put("bi", bi);
         syncOneValidProduct(obj, ean);
+    }
+
+    public void testProduct1() throws JSONException
+    {
+        final String ean = "111";
+        final String subst = "subst";
+        JSONObject obj = new JSONObject();
+
+        {
+            JSONArray bi = new JSONArray();
+            obj.put("ean", ean);
+            obj.put("name", "Test product 3");
+
+            {
+                JSONObject ingr = new JSONObject();
+                ingr.put("subst", subst);
+                ingr.put("min", 40);
+                ingr.put("max", 50);
+                bi.put(ingr);
+            }
+
+            obj.put("bi", bi);
+        }
+
+        Product p = syncOneValidProduct(obj, ean);
+        assertNotNull(p.badIngredients);
+        assertEquals(p.badIngredients.length, 1);
+
+        Product.Ingredient i1 = p.badIngredients[0];
+
+        assertNotNull(i1);
+        assertEquals(i1.min, 40);
+        assertEquals(i1.max, 50);
+        assertNotNull(i1.substance);
+        assertEquals(i1.substance.name, subst);
     }
 }
