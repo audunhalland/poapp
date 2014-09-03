@@ -166,6 +166,17 @@ class Sync {
     }
 
     /**
+     *  Delete all rows from database
+     */
+    private void deleteAll()
+    {
+        mDatabase.delete("bad_ingredient", "", null);
+        mDatabase.delete("ingredient", "", null);
+        mDatabase.delete("substance", "", null);
+        mDatabase.delete("product", "", null);
+    }
+
+    /**
      *  Sync top level json description document
      *  format is array of products
      */
@@ -176,6 +187,8 @@ class Sync {
 
         Log.d(TAG, "sql: begin transaction, network bound");
         mDatabase.beginTransaction();
+
+        deleteAll();
 
         try {
             reader.beginArray();
@@ -211,9 +224,11 @@ class Sync {
      */
     public boolean perform()
     {
-        if (mContext.deleteDatabase("db")) {
-            Log.d(TAG, "database deleted");
-        }
+        /*
+          if (mContext.deleteDatabase("db")) {
+          Log.d(TAG, "database deleted");
+          }
+        */
 
         try {
             return sync(new JsonReader(new InputStreamReader(getInputStream())));

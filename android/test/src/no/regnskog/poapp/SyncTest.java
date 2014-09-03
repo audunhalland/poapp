@@ -41,6 +41,8 @@ public class SyncTest extends AndroidTestCase
     {
         syncJSON(oneSizedArray(obj).toString());
 
+        assertEquals(Product.getProductCount(getContext()), 1);
+
         Product p = Product.getFromEAN(getContext(), ean);
         assertNotNull(p);
         assertEquals(p.ean, ean);
@@ -132,5 +134,58 @@ public class SyncTest extends AndroidTestCase
         assertEquals(i1.max, 50);
         assertNotNull(i1.substance);
         assertEquals(i1.substance.name, subst);
+    }
+
+    public void testProduct2() throws JSONException
+    {
+        final String ean = "111";
+        JSONObject obj = new JSONObject();
+        final int ningr = 5;
+
+        {
+            JSONArray bi = new JSONArray();
+            obj.put("ean", ean);
+            obj.put("name", "Multiple bi product");
+
+            for (int i = 0; i < ningr; ++i) {
+                JSONObject ingr = new JSONObject();
+                ingr.put("subst", "Substance " + i);
+                ingr.put("min", i * 10);
+                ingr.put("min", (i + 1) * 10);
+                bi.put(ingr);
+            }
+
+            obj.put("bi", bi);
+        }
+
+        Product p = syncOneValidProduct(obj, ean);
+        assertNotNull(p.badIngredients);
+        assertEquals(p.badIngredients.length, ningr);
+    }
+
+    public void testFailingSync() throws JSONException
+    {
+        // insert a product
+        testProduct1();
+
+        // then test a failing sync
+        Sync sync = new Sync(getContext()) {
+            @Override
+            protected InputStream getInputStream()
+            {
+                return new InputStream() {
+                    public int read() throws IOException
+                    {
+                        throw new IOException();
+                    }
+                };
+            }
+        };
+        assertFalse(sync.perform());
+
+        // product1 should still be available
+        Product p = Product.getFromEAN(getContext(), "111");
+        assertNotNull(p);
+        assertEquals(p.ean, "111");
     }
 }

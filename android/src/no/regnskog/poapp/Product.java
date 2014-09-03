@@ -115,6 +115,20 @@ class Product
         }
     }
 
+    public static long getProductCount(Context context)
+    {
+        DatabaseOpenHelper doh = new DatabaseOpenHelper(context);
+        SQLiteDatabase db = doh.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT count(*) FROM product", null);
+
+        if (c.moveToFirst()) {
+            return c.getLong(0);
+        } else {
+            assert(false);
+            return 0;
+        }
+    }
+
     public String toString()
     {
         return "product " + ean + " " + name;
