@@ -173,17 +173,27 @@ public class SyncTest extends AndroidTestCase
             @Override
             protected InputStream getInputStream()
             {
+                final ByteArrayInputStream bis =
+                    new ByteArrayInputStream("[{\"ean\":".getBytes());
+
                 return new InputStream() {
                     public int read() throws IOException
                     {
-                        throw new IOException();
+                        int data = bis.read();
+                        if (data == -1) {
+                            /* simulate network failure */
+                            throw new IOException();
+                        }
+                        return data;
                     }
                 };
             }
         };
+        // sync fails
         assertFalse(sync.perform());
 
-        // product1 should still be available
+        // product1 should still be available, by rolling back
+        // the delete that was initially done during the json process
         Product p = Product.getFromEAN(getContext(), "111");
         assertNotNull(p);
         assertEquals(p.ean, "111");

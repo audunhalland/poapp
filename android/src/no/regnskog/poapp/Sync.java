@@ -224,12 +224,6 @@ class Sync {
      */
     public boolean perform()
     {
-        /*
-          if (mContext.deleteDatabase("db")) {
-          Log.d(TAG, "database deleted");
-          }
-        */
-
         try {
             return sync(new JsonReader(new InputStreamReader(getInputStream())));
         } catch (IOException e) {
