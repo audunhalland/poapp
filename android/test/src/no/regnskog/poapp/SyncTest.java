@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import junit.framework.Test;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -197,5 +199,30 @@ public class SyncTest extends AndroidTestCase
         Product p = Product.getFromEAN(getContext(), "111");
         assertNotNull(p);
         assertEquals(p.ean, "111");
+    }
+
+    public void testSyncTimeout()
+    {
+        final HttpURLConnection conn;
+
+        try {
+            // guaranteed to time out?
+            URL url = new URL("http://10.255.255.1");
+            conn = (HttpURLConnection)url.openConnection();
+            conn.setConnectTimeout(1);
+            conn.setReadTimeout(1);
+
+            Sync sync = new Sync(getContext()) {
+                @Override
+                protected InputStream getInputStream() throws IOException
+                {
+                    return conn.getInputStream();
+                }
+            };
+            assertFalse(sync.perform());
+
+        } catch (Exception e) {
+            fail();
+        }
     }
 }

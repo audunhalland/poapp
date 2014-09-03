@@ -17,6 +17,7 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
     <activity android:name="ScanActivity">
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
@@ -24,5 +25,8 @@
       <intent-filter>
       </intent-filter>
     </activity>
+
+    <service android:name="SyncService"
+             android:exported="false" />
   </application>
 </manifest>

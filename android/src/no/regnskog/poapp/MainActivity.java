@@ -2,8 +2,11 @@ package no.regnskog.poapp;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,17 +18,38 @@ public class MainActivity extends Activity
 
     static final int SCAN_REQUEST = 1;
 
+    private BroadcastReceiver mReceiver;
+    private IntentFilter mRecIntentFilter;
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        mReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent)
+            {
+                Log.d(TAG, "received broadcast: " + intent.toString());
+            }
+        };
+        mRecIntentFilter = new IntentFilter();
+        mRecIntentFilter.addAction(Constants.BROADCAST_SYNC_SUCCESS);
+        mRecIntentFilter.addAction(Constants.BROADCAST_SYNC_FAILED);
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
+        registerReceiver(mReceiver, mRecIntentFilter);
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -76,9 +100,6 @@ public class MainActivity extends Activity
 
     public void updateClicked(View view)
     {
-        //DatabaseTest t = new DatabaseTest(this);
-        //t.insertTestProducts();
-        Sync sync = new Sync(this);
-        sync.perform();
+        startService(new Intent(this, SyncService.class));
     }
 }

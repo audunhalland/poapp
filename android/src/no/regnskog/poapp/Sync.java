@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.database.SQLException;
 import android.util.Log;
+import android.os.Handler;
 import com.google.gson.stream.JsonReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,8 +16,12 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
-class Sync {
+public class Sync
+{
     private static final String TAG = "Sync";
+
+    private static final int CONNECT_TIMEOUT = 10000;
+    private static final int READ_TIMEOUT = 20000;
 
     URL mURL;
     HttpURLConnection mConnection;
@@ -216,6 +221,8 @@ class Sync {
     protected InputStream getInputStream() throws IOException
     {
         mConnection = (HttpURLConnection)mURL.openConnection();
+        mConnection.setConnectTimeout(CONNECT_TIMEOUT);
+        mConnection.setReadTimeout(READ_TIMEOUT);
         return mConnection.getInputStream();
     }
 
@@ -230,9 +237,5 @@ class Sync {
             Log.e(TAG, "IO exception: " + e.toString());
             return false;
         }
-    }
-
-    public void performAsync()
-    {
     }
 };
