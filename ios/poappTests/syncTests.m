@@ -39,11 +39,40 @@
     XCTAssertNotNil(err, @"Expected error");
 }
 
+- (void)syncOneInvalidProduct:(NSDictionary*)product
+{
+    NSError *encodeErr = nil;
+    NSError *syncErr = nil;
+    NSArray *lst = [NSArray arrayWithObject:product];
+    [Database syncWithData:
+     [NSJSONSerialization dataWithJSONObject:lst options:NSJSONWritingPrettyPrinted error:&encodeErr]
+                     error:&syncErr];
+    XCTAssertNil(encodeErr, @"error in encode");
+    XCTAssertNotNil(syncErr, @"expected sync error");
+}
+
 - (void)testIllFormattedJSON
 {
     [self syncJSONError:@"hei"];
     [self syncJSONError:@"2"];
     [self syncJSONError:@"[}"];
+}
+
+- (void)testSyncNoProducts
+{
+    NSError *err;
+    [self syncJSON:@"[]" error:&err];
+    XCTAssertNil(err);
+}
+
+- (void)testSyncEmptyProduct
+{
+    [self syncJSONError:@"[{}]"];
+}
+
+- (void)testSyncLimitedProduct1
+{
+    [self syncOneInvalidProduct:[NSDictionary dictionaryWithObjectsAndKeys:@"ean", @"111", nil]];
 }
 
 @end

@@ -56,6 +56,10 @@
 
     NSLog(@"GOT DATA OF LENGTH %u", [array count]);
 
+    if ([array count] == 0) {
+        return;
+    }
+
     for (id obj in array) {
         NSDictionary *dict = (NSDictionary*)obj;
         NSManagedObject *p = [NSEntityDescription
@@ -82,10 +86,7 @@
         [p setValue:badIngredients forKey:@"badIngredients"];
     }
 
-    if (![moc save:errorPtr]) {
-        NSLog(@"Could not save products: %@", [*errorPtr localizedDescription]);
-        return;
-    }
+    [moc save:errorPtr];
 }
 
 + (void)syncOverHttpUsingBlock:(void(^)(NSError*))completionBlock
