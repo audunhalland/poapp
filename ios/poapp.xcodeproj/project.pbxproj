@@ -23,6 +23,8 @@
 		541E110D19ACA2F600758648 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 541E110B19ACA2F600758648 /* InfoPlist.strings */; };
 		541E110F19ACA2F600758648 /* poappTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E110E19ACA2F600758648 /* poappTests.m */; };
 		546AFA2C19AF4B1B0000FC87 /* ProductTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 546AFA2B19AF4B1B0000FC87 /* ProductTableViewController.m */; };
+		54B7A02819BCE1F100950002 /* syncTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 54B7A02719BCE1F100950002 /* syncTests.m */; };
+		54B7A03419BCE3DA00950002 /* Database.m in Sources */ = {isa = PBXBuildFile; fileRef = 54B7A03319BCE3DA00950002 /* Database.m */; };
 		54D41C2819ADF1D400E72677 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54D41C2719ADF1D400E72677 /* CoreData.framework */; };
 		54D41C2E19ADF25400E72677 /* Products.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 54D41C2C19ADF25400E72677 /* Products.xcdatamodeld */; };
 /* End PBXBuildFile section */
@@ -61,6 +63,9 @@
 		541E110E19ACA2F600758648 /* poappTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = poappTests.m; sourceTree = "<group>"; };
 		546AFA2A19AF4B1B0000FC87 /* ProductTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProductTableViewController.h; sourceTree = "<group>"; };
 		546AFA2B19AF4B1B0000FC87 /* ProductTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProductTableViewController.m; sourceTree = "<group>"; };
+		54B7A02719BCE1F100950002 /* syncTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = syncTests.m; sourceTree = "<group>"; };
+		54B7A03219BCE3DA00950002 /* Database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Database.h; sourceTree = "<group>"; };
+		54B7A03319BCE3DA00950002 /* Database.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Database.m; sourceTree = "<group>"; };
 		54D41C2719ADF1D400E72677 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		54D41C2D19ADF25400E72677 /* Products.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Products.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -124,16 +129,18 @@
 		541E10EF19ACA2F600758648 /* poapp */ = {
 			isa = PBXGroup;
 			children = (
-				54D41C2C19ADF25400E72677 /* Products.xcdatamodeld */,
 				541E10F819ACA2F600758648 /* AppDelegate.h */,
 				541E10F919ACA2F600758648 /* AppDelegate.m */,
-				540A5C4019ACAA4F00D46573 /* Storyboard.storyboard */,
+				54B7A03219BCE3DA00950002 /* Database.h */,
+				54B7A03319BCE3DA00950002 /* Database.m */,
+				540A5C4519AD1B4100D46573 /* MainViewController.h */,
+				540A5C4619AD1B4100D46573 /* MainViewController.m */,
+				54D41C2C19ADF25400E72677 /* Products.xcdatamodeld */,
 				546AFA2A19AF4B1B0000FC87 /* ProductTableViewController.h */,
 				546AFA2B19AF4B1B0000FC87 /* ProductTableViewController.m */,
 				540A5C4219ACB15000D46573 /* ScanViewController.h */,
 				540A5C4319ACB15000D46573 /* ScanViewController.m */,
-				540A5C4519AD1B4100D46573 /* MainViewController.h */,
-				540A5C4619AD1B4100D46573 /* MainViewController.m */,
+				540A5C4019ACAA4F00D46573 /* Storyboard.storyboard */,
 				541E10FB19ACA2F600758648 /* Images.xcassets */,
 				541E10F019ACA2F600758648 /* Supporting Files */,
 			);
@@ -154,6 +161,7 @@
 		541E110819ACA2F600758648 /* poappTests */ = {
 			isa = PBXGroup;
 			children = (
+				54B7A02719BCE1F100950002 /* syncTests.m */,
 				541E110E19ACA2F600758648 /* poappTests.m */,
 				541E110919ACA2F600758648 /* Supporting Files */,
 			);
@@ -267,6 +275,7 @@
 			files = (
 				541E10FA19ACA2F600758648 /* AppDelegate.m in Sources */,
 				540A5C4419ACB15000D46573 /* ScanViewController.m in Sources */,
+				54B7A03419BCE3DA00950002 /* Database.m in Sources */,
 				541E10F619ACA2F600758648 /* main.m in Sources */,
 				54D41C2E19ADF25400E72677 /* Products.xcdatamodeld in Sources */,
 				540A5C4719AD1B4100D46573 /* MainViewController.m in Sources */,
@@ -278,6 +287,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				54B7A02819BCE1F100950002 /* syncTests.m in Sources */,
 				541E110F19ACA2F600758648 /* poappTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

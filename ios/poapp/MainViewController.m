@@ -9,6 +9,7 @@
 #import "MainViewController.h"
 #import "ScanViewController.h"
 #import "AppDelegate.h"
+#import "Database.h"
 
 @interface MainViewController ()
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *testRefreshButton;
@@ -59,7 +60,7 @@
 
 - (void)handleScannedCode:(NSString*)code
 {
-    NSManagedObject *product = [self productForEan:code];
+    NSManagedObject *product = [Database productForEan:code];
 
     if (product) {
         NSSet *badIngredients = [product valueForKey:@"badIngredients"];
@@ -94,118 +95,18 @@
     }
 }
 
-- (NSManagedObject *)productForEan:(NSString *)ean
-{
-    AppDelegate *ad = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-    NSManagedObjectContext *moc = ad.managedObjectContext;
-    NSFetchRequest *fr = [[NSFetchRequest alloc] init];
-    NSError *err = nil;
-
-    [fr setEntity:[NSEntityDescription entityForName:@"Product" inManagedObjectContext:moc]];
-    [fr setPredicate:[NSPredicate predicateWithFormat:@"ean == %@", ean]];
-
-    NSArray *a = [moc executeFetchRequest:fr error:&err];
-
-    if (err) {
-        NSLog(@"Error: %@", [err localizedDescription]);
-        return nil;
-    }
-
-    if ([a count] == 1) {
-        return [a objectAtIndex:0];
-    } else {
-        return nil;
-    }
-}
-
 - (void)testSync
 {
-    NSString *path = @"http://audunhalland.com/podb/po.php";
-    NSURL *url = [[NSURL alloc] initWithString:path];
-
-    // disable rest of UI
     [_testRefreshButton setEnabled:NO];
     [_scanButton setEnabled:NO];
 
-    [NSURLConnection sendAsynchronousRequest:[[NSURLRequest alloc] initWithURL:url]
-                                       queue:[[NSOperationQueue alloc] init]
-                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *err) {
-                               if (err) {
-                                   [self syncError:err];
-                               } else {
-                                   NSError *err = [self receivedData:data];
-                                   if (err) {
-                                       NSLog(@"error in receivedData: %@", [err localizedDescription]);
-                                   }
-                               }
-                           }];
-}
-
-- (void)syncDone
-{
-    [_testRefreshButton setEnabled:YES];
-    [_scanButton setEnabled:YES];
-}
-
-- (NSError *)receivedData:(NSData *)data
-{
-    NSError *err = nil;
-    NSArray *array = [NSJSONSerialization JSONObjectWithData:data options:0 error:&err];
-    if (err) return err;
-
-    AppDelegate *ad = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-    err = [ad deleteDatabase];
-    if (err) return err;
-
-    NSManagedObjectContext *moc = ad.managedObjectContext;
-    NSMutableDictionary *substances = [[NSMutableDictionary alloc] init];
-
-    {
-        NSManagedObject *po = [NSEntityDescription
-                               insertNewObjectForEntityForName:@"Substance"
-                               inManagedObjectContext:moc];
-        [po setValue:@"po" forKey:@"name"];
-        [substances setObject:po forKey:@"po"];
-    }
-    
-    NSLog(@"GOT DATA OF LENGTH %u", [array count]);
-    
-    for (id obj in array) {
-        NSDictionary *dict = (NSDictionary*)obj;
-        NSManagedObject *p = [NSEntityDescription
-                              insertNewObjectForEntityForName:@"Product"
-                              inManagedObjectContext:moc];
-
-        // BUG: can there be more than one ean for a product?
-        [p setValue:[dict objectForKey:@"ean"] forKey:@"ean"];
-        [p setValue:[dict objectForKey:@"name"] forKey:@"name"];
-
-        NSMutableSet *badIngredients = [[NSMutableSet alloc] init];
-
-        for (id idict in [dict objectForKey:@"bi"]) {
-            NSManagedObject *ingr = [NSEntityDescription
-                                     insertNewObjectForEntityForName:@"Ingredient"
-                                     inManagedObjectContext:moc];
-            [ingr setValue:[idict objectForKey:@"min"] forKey:@"percentageLowerBound"];
-            [ingr setValue:[idict objectForKey:@"max"] forKey:@"percentageHigherBound"];
-            //since there is only one supported substance (for now):
-            [ingr setValue:[substances objectForKey:[idict objectForKey:@"subst"]] forKey:@"substance"];
-            [badIngredients addObject:ingr];
+    [Database syncOverHttpUsingBlock:^(NSError *err) {
+        if (err) {
+            [self syncError:err];
         }
-
-        [p setValue:badIngredients forKey:@"badIngredients"];
-    }
-    
-    if (![moc save:&err]) {
-        NSLog(@"Could not save products: %@", [err localizedDescription]);
-    }
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        /* TODO: consider having a delay here */
-        [self syncDone];
-    });
-
-    return nil;
+        [_testRefreshButton setEnabled:YES];
+        [_scanButton setEnabled:YES];
+    }];
 }
 
 - (void)syncError:(NSError *)error
